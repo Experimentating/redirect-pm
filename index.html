@@ -3,17 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Param Gala - Contact</title>
+    <title>Add Contact - Param Gala</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .contact-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            animation: slideUp 0.6s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .profile-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        h1 {
+            margin: 0 0 5px 0;
+            font-size: 24px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .title {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .company {
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+        
+        .contact-info {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .contact-icon {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .add-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease;
+            margin-bottom: 10px;
+        }
+        
+        .add-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .add-button:active {
+            transform: translateY(0);
+        }
+        
+        .fallback-button {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        
+        .fallback-button:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .status.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 480px) {
+            .contact-card {
+                margin: 20px;
+                padding: 30px 25px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-        <h2>Param Gala</h2>
-        <p>Principal Architect, Plug Collective</p>
-        <p>Downloading contact card...</p>
+    <div class="contact-card">
+        <div class="profile-circle">PG</div>
+        <h1>Param Gala</h1>
+        <div class="title">Principal Architect</div>
+        <div class="company">Plug Collective</div>
+        
+        <div class="contact-info">
+            <div class="contact-item">
+                <div class="contact-icon">📧</div>
+                <div>paramgala99@gmail.com</div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">💼</div>
+                <div>param@plugcollective.in</div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">📱</div>
+                <div>+91 8879825004</div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">🔗</div>
+                <div>linktr.ee/plug.collective</div>
+            </div>
+        </div>
+        
+        <button class="add-button" onclick="addToContactsNative()">
+            Add to Contacts
+        </button>
+        
+        <button class="fallback-button" onclick="downloadVCF()" style="display: none;" id="fallbackBtn">
+            Download Contact Card
+        </button>
+        
+        <div class="status" id="status"></div>
     </div>
 
     <script>
-        // Create the VCF content
+        // VCF content
         const vcfContent = `BEGIN:VCARD
 VERSION:3.0
 N:Gala;Param;
@@ -25,7 +201,79 @@ TEL;TYPE=mobile:+918879825004
 URL;TYPE=linktree:https://linktr.ee/plug.collective
 END:VCARD`;
 
-        // Function to trigger download
+        // Device detection
+        function isAndroid() {
+            return /Android/i.test(navigator.userAgent);
+        }
+        
+        function isIOS() {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+        
+        function isMobile() {
+            return isAndroid() || isIOS();
+        }
+
+        // Create data URI for VCF
+        function createVCFDataURI() {
+            return 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcfContent);
+        }
+
+        // Native contact addition
+        function addToContactsNative() {
+            const button = document.querySelector('.add-button');
+            const status = document.getElementById('status');
+            const fallbackBtn = document.getElementById('fallbackBtn');
+            
+            button.textContent = 'Opening...';
+            button.disabled = true;
+            
+            let success = false;
+            
+            if (isAndroid()) {
+                // Android intent to add contact
+                const intentURL = `intent://contacts/people/#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/contact;S.name=Param Gala;S.phone=+918879825004;S.email=paramgala99@gmail.com;S.organization=Plug Collective;S.title=Principal Architect;end`;
+                
+                try {
+                    window.location.href = intentURL;
+                    success = true;
+                    
+                    setTimeout(() => {
+                        status.textContent = 'Contact app opened! Fill in any missing details and save.';
+                        status.classList.add('show');
+                    }, 1000);
+                } catch (e) {
+                    console.log('Android intent failed, trying fallback');
+                }
+            } 
+            else if (isIOS()) {
+                // iOS: Use data URI to trigger contact import
+                try {
+                    const vcfDataURI = createVCFDataURI();
+                    window.location.href = vcfDataURI;
+                    success = true;
+                    
+                    setTimeout(() => {
+                        status.textContent = 'Contact card opened! Tap "Add Contact" to save.';
+                        status.classList.add('show');
+                    }, 1000);
+                } catch (e) {
+                    console.log('iOS data URI failed, trying fallback');
+                }
+            }
+            
+            // Fallback for desktop or if native methods fail
+            if (!success || (!isAndroid() && !isIOS())) {
+                setTimeout(() => {
+                    button.style.display = 'none';
+                    fallbackBtn.style.display = 'block';
+                    status.textContent = 'Use the button below to download the contact card.';
+                    status.classList.add('show');
+                }, 1500);
+            }
+        }
+
+        // Fallback VCF download
         function downloadVCF() {
             const blob = new Blob([vcfContent], { type: 'text/vcard' });
             const url = window.URL.createObjectURL(blob);
@@ -36,12 +284,18 @@ END:VCARD`;
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
+            
+            const status = document.getElementById('status');
+            status.textContent = 'Contact card downloaded! Import it to your contacts app.';
+            status.classList.add('show');
         }
 
-        // Auto-download when page loads
-        window.onload = function() {
-            setTimeout(downloadVCF, 500); // Small delay to ensure page loads
-        };
+        // Auto-trigger on mobile devices after short delay
+        if (isMobile()) {
+            setTimeout(() => {
+                addToContactsNative();
+            }, 1500);
+        }
     </script>
 </body>
 </html>
