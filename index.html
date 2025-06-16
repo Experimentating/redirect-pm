@@ -1,12 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Param Gala - Contact</title>
+</head>
 <body>
-    <script>
-      #  window.location.href = "https://linktr.ee/plug.collective";
-window.location.href = 'plug.vcf';
-    </script>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h2>Param Gala</h2>
+        <p>Principal Architect, Plug Collective</p>
+        <p>Downloading contact card...</p>
+    </div>
 
-    
+    <script>
+        // Create the VCF content
+        const vcfContent = `BEGIN:VCARD
+VERSION:3.0
+N:Gala;Param;
+ORG:Plug Collective
+TITLE:Principal Architect
+EMAIL;TYPE=personal:paramgala99@gmail.com
+EMAIL;TYPE=work:param@plugcollective.in
+TEL;TYPE=mobile:+918879825004
+URL;TYPE=linktree:https://linktr.ee/plug.collective
+END:VCARD`;
+
+        // Function to trigger download
+        function downloadVCF() {
+            const blob = new Blob([vcfContent], { type: 'text/vcard' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'param-gala-contact.vcf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Auto-download when page loads
+        window.onload = function() {
+            setTimeout(downloadVCF, 500); // Small delay to ensure page loads
+        };
+    </script>
 </body>
 </html>
